@@ -1,6 +1,4 @@
-requirements = """
 streamlit
 plotly
 pandas
 yfinance
-"""
