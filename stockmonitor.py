@@ -95,7 +95,7 @@ with col1:
         # Dentro da coluna um criei um loop para baixar os dados de cada uma das ações, como estamos trabalhando com ações
         # brasileiras criei a variavel ticker e atribui a ela a variavel ação formatada como f string concatenado com .SA
         if not dados.empty:
-            preco_atual = dados['Close'].iloc[-1]
+            preco_atual = float(dados['Close'].iloc[-1])
             preco_inicio_periodo = dados['Close'].iloc[0]
             variacao_percentual = (preco_atual - preco_inicio_periodo) / preco_inicio_periodo * 100
 
