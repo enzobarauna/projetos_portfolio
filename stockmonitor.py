@@ -92,25 +92,39 @@ with col1:
     for acao in acoes_selecionadas:
         ticker = f"{acao}.SA"
         dados = yf.download(ticker, start=data_inicio, end=data_final)
-        # Dentro da coluna um criei um loop para baixar os dados de cada uma das ações, como estamos trabalhando com ações
-        # brasileiras criei a variavel ticker e atribui a ela a variavel ação formatada como f string concatenado com .SA
+
+        # Verifica se os dados não estão vazios
         if not dados.empty:
-            preco_atual = dados['Close'].iloc[-1]
-            preco_inicio_periodo = dados['Close'].iloc[0]
-            variacao_percentual = (preco_atual - preco_inicio_periodo) / preco_inicio_periodo * 100
+            # Verifica se a coluna 'Close' contém valores numéricos
+            if pd.api.types.is_numeric_dtype(dados['Close']):
+                
+                # Verifica se o dataframe tem pelo menos 2 valores para evitar erro ao acessar o primeiro e o último
+                if len(dados['Close']) > 1:
+                    preco_atual = dados['Close'].iloc[-1]
+                    preco_inicio_periodo = dados['Close'].iloc[0]
 
+                    # checagem de erros com NaN e valores inválidos
+                    if pd.notna(preco_atual) and pd.notna(preco_inicio_periodo):
+                        variacao_percentual = (preco_atual - preco_inicio_periodo) / preco_inicio_periodo * 100
 
-            volume_total = dados['Volume'].sum()
-            # Dentro de um If-else fiz uma breve validação dos dados e calculei as métricas que entrarão na nossa lista
-            # abaixo
-            lista_metricas.append({
-                'Ação': acao,
-                'Preço Atual': f'R$ {preco_atual:.2f}',
-                'Variação Percentual': variacao_percentual,
-                'Volume Total': volume_total
-            })
+                        
+                        volume_total = dados['Volume'].sum()
+
+                        lista_metricas.append({
+                            'Ação': acao,
+                            'Preço Atual': f'R$ {preco_atual:.2f}',
+                            'Variação Percentual': variacao_percentual,
+                            'Volume Total': volume_total
+                        })
+                    else:
+                        st.warning(f'Dados inválidos para {acao}. Verifique o ticker ou período.')
+                else:
+                    st.warning(f'Dados insuficientes para {acao}. Período muito curto.')
+            else:
+                st.warning(f'Dados de preço não numéricos para {acao}.')
         else:
-            st.warning(f"Nenhum dado disponível para {acao}. Verifique o ticker.")
+            st.warning(f'Nenhum dado disponível para {acao}. Verifique o ticker.')
+
 
     # Converti a lista de métricas em um DataFrame
     df_metrica = pd.DataFrame(lista_metricas)
